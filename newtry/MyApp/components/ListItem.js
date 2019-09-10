@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import {Container, Left, Thumbnail, ListItem as BaseListItem} from 'native-base';
+
 
 const getThumbnail = (url) => {
   console.log('urli', url);
@@ -23,6 +25,17 @@ const ListItem = (props) => {
   const tn = getThumbnail(singleMedia.file_id);
   console.log('thumbnails', tn);
   return (
+    <BaseListItem>
+      onPress={
+        () => {
+          navigation.push('Single', {file: singleMedia});
+        }
+      }
+      <Left>
+          <Thumbnail source={{uri: 'http://media.mw.metropolia.fi/wbma/uploads/' + tn.w160}} />
+      </Left>
+    </BaseListItem>
+    /*
     <TouchableOpacity
       style={styles.row}
       onPress={
@@ -42,10 +55,10 @@ const ListItem = (props) => {
         <Text style={styles.listTitle}> {singleMedia.title} </Text>
         <Text> {singleMedia.description} </Text>
       </View>
-    </TouchableOpacity>
+    </TouchableOpacity> */
   );
 };
-
+/*
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
@@ -76,5 +89,5 @@ ListItem.propTypes = {
   singleMedia: PropTypes.object,
   navigation: PropTypes.object,
 };
-
+*/
 export default ListItem;

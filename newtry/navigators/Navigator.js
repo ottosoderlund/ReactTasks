@@ -6,8 +6,32 @@ import Profile from '../views/Profile';
 import Single from '../views/Single';
 import AuthLoading from '../views/AuthLoading';
 import Login from '../views/Login';
+import {Icon} from 'native-base';
 
 const TabNavigator = createBottomTabNavigator(
+  {
+    Home,
+    Profile
+  },
+  {
+    defaultNavigationOptions: ({navigation}) => ({
+      tabBarIcon: () => {
+        const {routeName} = navigation.state;
+        let iconName;
+        if (routeName === 'Home') {
+          iconName = 'home';
+        } else if (routeName === 'Profile') {
+          iconName = 'person';
+        }
+        return <Icon
+          name={iconName}
+          size={25}
+        />;
+        },
+      },
+    }),
+  }
+  /*
     {
       Home: {
         screen: Home,
@@ -53,6 +77,7 @@ const Navigator = createSwitchNavigator(
     {
       initialRouteName: 'AuthLoading',
     }
+    */
 );
 
 export default createAppContainer(Navigator);

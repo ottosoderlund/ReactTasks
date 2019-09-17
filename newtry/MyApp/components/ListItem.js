@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
-import {Container, Left, Thumbnail, ListItem as BaseListItem} from 'native-base';
+import {Container, Left, Thumbnail, ListItem as BaseListItem, Content, Body, Right, Icon} from 'native-base';
 
 
 const getThumbnail = (url) => {
@@ -25,15 +25,24 @@ const ListItem = (props) => {
   const tn = getThumbnail(singleMedia.file_id);
   console.log('thumbnails', tn);
   return (
-    <BaseListItem>
+    <BaseListItem thumbnail>
       onPress={
         () => {
-          navigation.push('Single', {file: singleMedia});
+          navigation.push('Single', {file: props.singleMedia});
         }
       }
-      <Left>
-          <Thumbnail source={{uri: 'http://media.mw.metropolia.fi/wbma/uploads/' + tn.w160}} />
-      </Left>
+        <Left>
+            <Thumbnail source={{uri: 'http://media.mw.metropolia.fi/wbma/uploads/' + tn.w160}} />
+        </Left>
+        <Body>
+          <Text> {props.singleMedia.title} </Text>
+          <Text> {props.singleMedia.description} </Text>
+        </Body>
+        <Right>
+          <Button transparent>
+            <Icon style={{ opacity: 40, color: 'blue' }} name='arrow-forward' />
+          </Button>
+        </Right>
     </BaseListItem>
     /*
     <TouchableOpacity

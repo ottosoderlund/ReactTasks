@@ -34,7 +34,7 @@ const fetchPostUrl = async (url, data) => {
 
 const mediaAPI = () => {
   const getAllMedia = () => {
-    const [media, setMedia] = useContext(MediaContext);
+    const {media, setMedia} = useContext(MediaContext);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
       fetchGetUrl(apiUrl + 'media').then((json) => {
@@ -60,7 +60,7 @@ const mediaAPI = () => {
     };
     const json = await fetchPostUrl(apiUrl + 'login', data);
     await AsyncStorage.setItem('userToken', json.token);
-    // await AsyncStorage.setItem('user', JSON.stringify(json.user));
+    await AsyncStorage.setItem('user', JSON.stringify(json.user));
     props.navigation.navigate('App');
   };
   const registerAsync = async (inputs, props) => {
@@ -76,44 +76,102 @@ const mediaAPI = () => {
     }
   };
 
-  const getUserFromToken = async () => {
-    fetchGetUrl(apiUrl + 'users/user').then((json) => {
-      console.log('getUserTOken', json);
-      AsyncStorage.setItem('user', JSON.stringify(json));
+  // const getUserFromToken = async () => {
+  //   useEffect(() => {
+  //     fetchGetUrl(apiUrl + 'users/user').then((json) => {
+  //       console.log('getUserTOken', json);
+  //       AsyncStorage.setItem('user', JSON.stringify(json));
+  //     });
+  //   }, []);
+  // };
+
+  const userToContext = async () => {
+    const {user, setUser} = useContext(MediaContext);
+    const getFromStorage = async () => {
+      const storageUser = JSON.parse(await AsyncStorage.getItem('user'));
+      console.log('storage', storageUser);
+      setUser(storageUser);
+    };
+    useEffect(() => {
+      getFromStorage();
+    }, []);
+    return [user];
+  };
+
+
+  const getAvatar = (user) => {
+    const [avatar, setAvatar] = useState('http://placekitten.com/100/100');
+    console.log('avatar', apiUrl + 'tags/avatar_' + user.user_id);
+    useEffect(() => {
+      fetchGetUrl(apiUrl + 'tags/avatar_' + user.user_id).then((json) => {
+        console.log('avatarjson', json[0].filename);
+        setAvatar(apiUrl + 'uploads/' + json[0].filename);
+      });
+    }, []);
+    return avatar;
+  };
+
+  const getUserInfo = (userId) => {
+    const [userInfo, setUserInfo] = useState({});
+    useEffect(() => {
+      fetchGetUrl(apiUrl + 'users/' + userId).then((json) => {
+        setUserInfo(json);
+      }).catch((error)=>{
+        setUserInfo({});
+      });
+    }, []);
+    return userInfo;
+  };
+
+  const checkAvailable = async (username) => {
+    const json = await fetchGetUrl(apiUrl + 'users/username/' + username);
+    if (!json.error) {
+      if (json.available) {
+        return 'Username ' + json.username + ' is available. ';
+      } else {
+        return 'Username ' + json.username + ' is not available. ';
+      }
+    } else {
+      console.log(json.error);
+    }
+  };
+
+  const fetchUploadUrl = async (url, data) => {
+    const userToken = await AsyncStorage.getItem('userToken');
+    console.log('fetchUploadUrl', url, data, userToken);
+    const response = await fetch(apiUrl + url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'multipart/form-data',
+        'x-access-token': userToken,
+      },
+      body: data,
+    });
+    let json = {error: 'oops'};
+    if (response.ok) {
+      json = await response.json();
+      console.log('fetchUploadUrl json', json);
+    }
+    return json;
+  };
+
+  const uploadFile = async (formData) => {
+    return fetchUploadUrl('media', formData).then((json) => {
+      return json;
     });
   };
 
-/*
-  const getAvatar = (user) => {
-    const [avatar, setAvatar] = useState({});
-    console.log('avatar', apiUrl + 'tags/avatar_' + user.user_id);
-    fetchGetUrl(apiUrl + 'tags/avatar_' + user.user_id).then((json) => {
-      console.log('avatarjson', json[0].filename);
-      setAvatar(apiUrl + 'uploads/' + json[0].filename);
-    });
-    return avatar;
-  };
-*/
-const getAvatar = () => {
-  const { user } = useContext(MediaContext);
-  console.log('getAvatar user', user);
-  let avatar;
-  return fetchGetUrl(apiUrl + 'tags/avatar_' + user.user.user_id).then(
-    json => {
-      console.log('avatarjson', json);
-      avatar = apiUrl + 'uploads/' + json[0].filename;
-      return avatar;
-    }
-  );
-};
 
   return {
     getAllMedia,
     getThumbnail,
     signInAsync,
     registerAsync,
-    getUserFromToken,
+    userToContext,
     getAvatar,
+    getUserInfo,
+    checkAvailable,
+    uploadFile,
   };
 };
 
